@@ -84,6 +84,11 @@ ggplot(data=mpsz3414,
       x = "Pre-school density (per km sq)",
       y = "Frequency")
 
+ggplot(data=mpsz3414, 
+       aes(x= as.numeric(`PreSch Density`), y = as.numeric(`PreSch Count`)))+
+
+geom_point()+
+labs(x = "Pre-school density (per km sq)", y = "Pre-school count")
 
 
 pacman::p_load(sf, tmap, tidyverse)
