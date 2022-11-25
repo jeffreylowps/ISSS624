@@ -1,0 +1,17 @@
+---
+title: "Hands-on_ex2"
+editor: visual
+---
+
+Overview
+
+This is Hands-on Exercise 2
+
+Getting Started
+
+The code chunk below will install and load tidyverse, spdep, tmap and sf packages.
+
+```{r}
+pacman::p_load(sf, spdep, tidyverse, tmap)
+```
+

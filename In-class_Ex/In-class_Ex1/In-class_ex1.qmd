@@ -19,7 +19,7 @@ pacman::p_load(sf, tidyverse, tmap, spdep)
 
 ## Importing Geospatial Data
 
-Importing polygon features
+### Importing polygon features
 
 This code chunk will import ESRI shapefile into R.
 
@@ -28,7 +28,7 @@ hunan <- st_read(dsn = "data/geospatial", layer = "Hunan")
 
 ```
 
-Importing attribute data in csv
+### Importing attribute data in csv
 
 ```{r}
 hunan2012 = read_csv("data/aspatial/Hunan_2012.csv")
