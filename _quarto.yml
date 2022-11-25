@@ -9,7 +9,7 @@ website:
         menu: 
           - text: Hands-on Exercise 1
             href: Hands-on_Ex1.qmd
-          - text: In Class Exercise 1
+          - text: In-class Exercise 1
             href: C:/jeffreylowps/ISSS624/In-class_Ex/In-class_Ex1/In-class_ex1.qmd
     right:
       - href: index.qmd
