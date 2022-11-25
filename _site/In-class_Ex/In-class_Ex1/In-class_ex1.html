@@ -143,15 +143,19 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item dropdown ">
-    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">Hands-on Exercises</a>
-    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercises">    
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-exercises" role="button" data-bs-toggle="dropdown" aria-expanded="false">Exercises</a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-exercises">    
         <li>
     <a class="dropdown-item" href="../../Hands-on_Ex1.html">
  <span class="dropdown-text">Hands-on Exercise 1</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="C:/jeffreylowps/ISSS624/In-class_Ex/In-class_Ex1/In-class_ex1.qmd">
- <span class="dropdown-text">In Class Exercise 1</span></a>
+    <a class="dropdown-item" href="../../In-class_Ex/In-class_Ex1/In-class_ex1.html">
+ <span class="dropdown-text">In-class Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex2/Hands-on_Ex2.html">
+ <span class="dropdown-text">Hands-on Exercise 2</span></a>
   </li>  
     </ul>
   </li>
@@ -180,7 +184,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
   <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting Started</a></li>
-  <li><a href="#importing-geospatial-data" id="toc-importing-geospatial-data" class="nav-link" data-scroll-target="#importing-geospatial-data">Importing Geospatial Data</a></li>
+  <li><a href="#importing-geospatial-data" id="toc-importing-geospatial-data" class="nav-link" data-scroll-target="#importing-geospatial-data">Importing Geospatial Data</a>
+  <ul class="collapse">
+  <li><a href="#importing-polygon-features" id="toc-importing-polygon-features" class="nav-link" data-scroll-target="#importing-polygon-features">Importing polygon features</a></li>
+  <li><a href="#importing-attribute-data-in-csv" id="toc-importing-attribute-data-in-csv" class="nav-link" data-scroll-target="#importing-attribute-data-in-csv">Importing attribute data in csv</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -216,7 +224,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </section>
 <section id="importing-geospatial-data" class="level2">
 <h2 class="anchored" data-anchor-id="importing-geospatial-data">Importing Geospatial Data</h2>
-<p>Importing polygon features</p>
+<section id="importing-polygon-features" class="level3">
+<h3 class="anchored" data-anchor-id="importing-polygon-features">Importing polygon features</h3>
 <p>This code chunk will import ESRI shapefile into R.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>hunan <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>, <span class="at">layer =</span> <span class="st">"Hunan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -231,7 +240,9 @@ Bounding box:  xmin: 108.7831 ymin: 24.6342 xmax: 114.2544 ymax: 30.12812
 Geodetic CRS:  WGS 84</code></pre>
 </div>
 </div>
-<p>Importing attribute data in csv</p>
+</section>
+<section id="importing-attribute-data-in-csv" class="level3">
+<h3 class="anchored" data-anchor-id="importing-attribute-data-in-csv">Importing attribute data in csv</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>hunan2012 <span class="ot">=</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/Hunan_2012.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -1584,6 +1595,7 @@ B 88 7744 448 896 10224</code></pre>
 </div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
