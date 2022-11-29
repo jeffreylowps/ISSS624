@@ -1,6 +1,4 @@
-\-\--
-title: "ISSS624"
-\-\--
+\-\-- title: "ISSS624" \-\--
 
 ## Student: Jeffrey Low
 
