@@ -110,23 +110,23 @@ We can plot the distribution of the variables (i.e. Number of households with ra
 
 Histogram is useful to identify the overall distribution of the data values (i.e. left skew, right skew or normal distribution)
 
-```{r}
+```{r, fig.width=4, fig.height=3}
 ggplot(data = ict_derived, aes(x=`RADIO`)) + geom_histogram(bins = 20, color="black", fill="light blue")
 ```
 
 Boxplot is useful to detect outliers.
 
-```{r}
+```{r, fig.width=4, fig.height=3}
 ggplot(data = ict_derived, aes(x= `RADIO`)) + geom_boxplot(color="black", fill="light blue")
 ```
 
 Next we will be plotting the distribution of the newly derived variables (i.e. Radio penetration rate) by using the code chunk below.
 
-```{r}
+```{r, fig.width=4, fig.height=3}
 ggplot(data = ict_derived, aes(x=`RADIO_PR`)) + geom_histogram(bins = 20, color="black", fill="light blue")
 ```
 
-```{r}
+```{r, fig.width=4, fig.height=3}
 ggplot(data = ict_derived, aes(x=`RADIO_PR`)) + geom_boxplot(color="black", fill="light blue")
 ```
 
@@ -309,7 +309,7 @@ hclust_ward <- hclust(proxmat, method = 'ward.D')
 
 We can then plot the tree by using plot() of R Graphics as shown in the code chunk below.
 
-```{r}
+```{r, fig.width=10, fig.height=6}
 plot(hclust_ward, cex=0.6)
 ```
 
@@ -571,3 +571,5 @@ hclust.map <- qtm(shan_sf_cluster, "CLUSTER") + tm_borders(alpha = 0.5)
 shclust.map <- qtm(shan_sf_spatialcluster, "SP_CLUSTER") + tm_borders(alpha = 0.5)
 tmap_arrange(hclust.map,shclust.map, asp = NA, ncol = 2)
 ```
+
+
