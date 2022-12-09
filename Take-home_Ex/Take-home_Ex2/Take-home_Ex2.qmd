@@ -1,0 +1,612 @@
+---
+title: "Take Home Exercise 2"
+editor: visual
+---
+
+# Overview
+
+This is Take Home Exercise 2
+
+# Getting Started
+
+## Loading in the R packages
+
+```{r}
+pacman::p_load(rgdal, spdep, tmap, sf, ClustGeo, 
+               ggpubr, cluster, factoextra, NbClust,
+               heatmaply, corrplot, psych, tidyverse)
+```
+
+## Importing the Water Point Data
+
+```{r}
+#| eval: false
+wp <- st_read(dsn = "data", layer = "geo_export", crs = 4326) %>% filter(clean_coun == "Nigeria") 
+```
+
+## Importing the LGA Boundaries
+
+```{r}
+#| eval: false
+nga <- st_read(dsn = "data", layer = "nga_admbnda_adm2_osgof_20190417", crs=4326)
+```
+
+# Data Wrangling
+
+## Duplicate ShapeNames
+
+(Remember to credit BUT ONLY INSPIRED BY [Jordan](https://jordan-isss624-geospatial.netlify.app/posts/geo/geospatial_exercise/#data-wrangling))
+
+Credit to Anica for the additional code 8)
+
+```{r}
+#| eval: false
+nga <- (nga[order(nga$ADM2_EN), ])
+
+duplicate_area <- nga$ADM2_EN[ nga$ADM2_EN %in% nga$ADM2_EN[duplicated(nga$ADM2_EN)] ]
+
+duplicate_area
+```
+
+```{r}
+#| eval: false
+duplicates <- unique(duplicate_area)
+
+find_rows <- function(x) {
+  which(nga$ADM2_EN == x)
+}
+
+to_replace <- c()
+
+for (x in duplicates){
+  to_replace <- append(to_replace, as.vector(find_rows(x)))
+}
+
+to_replace
+```
+
+```{r}
+#| eval: false
+new_LGA_names <- c()
+
+for (x in to_replace){
+new_LGA_names <- append(new_LGA_names, paste(nga$ADM2_EN[x],"(", nga$ADM1_EN[x], ")"))
+}
+
+new_LGA_names
+
+```
+
+```{r}
+#| eval: false
+nga$ADM2_EN[to_replace]  <- new_LGA_names
+
+duplicate_area <- nga$ADM2_EN[ nga$ADM2_EN %in% nga$ADM2_EN[duplicated(nga$ADM2_EN)] ]
+
+duplicate_area
+```
+
+## Replace NA values
+
+### status_cle
+
+```{r}
+#| eval: false
+sum(is.na(wp$status_cle))
+```
+
+```{r}
+#| eval: false
+wp <- mutate(wp, status_cle = replace_na(status_cle, "Unknown"))
+```
+
+```{r}
+#| eval: false
+sum(is.na(wp$status_cle))
+```
+
+### Replace NA in x_water_tec
+
+```{r}
+#| eval: false
+sum(is.na(wp$X_water_tec))
+```
+
+```{r}
+#| eval: false
+wp <- mutate(wp, X_water_tec = replace_na(X_water_tec, "Unknown"))
+```
+
+```{r}
+#| eval: false
+sum(is.na(wp$X_water_tec))
+```
+
+Checking if there is NA values in usage_cap
+
+```{r}
+#| eval: false
+sum(is.na(wp$usage_cap))
+```
+
+Check if there is NA values in is_urban
+
+```{r}
+#| eval: false
+sum(is.na(wp$is_urban))
+```
+
+Extract the total number of functional water point
+
+```{r}
+#| eval: false
+wpt_functional <- wp %>%
+  filter(status_cle %in% c("Functional", "Functional but not in use", "Functional but needs repair"))
+```
+
+Extract the total number of non-functional water point
+
+```{r}
+#| eval: false
+wpt_nonfunctional <- wp %>%
+  filter(status_cle %in% c("Abandoned/Decommissioned", "Abandoned", "Non-Functional", "Non functional due to dry season", "Non-Functional due to dry season"))
+```
+
+Extract the total number of water point with "unknown" status
+
+```{r}
+#| eval: false
+wpt_unkown <- wp %>%
+  filter(status_cle == "Unknown")
+```
+
+## Point in Polygon Count
+
+```{r}
+#| eval: false
+nga_wp <- nga %>%
+  mutate(`total wpt` = lengths(st_intersects(nga, wp))) %>%
+  mutate(`wpt_functional` = lengths(st_intersects(nga, wpt_functional))) %>%
+  mutate(`wpt non_functional` = lengths(st_intersects(nga, wpt_nonfunctional))) %>%
+  mutate(`wpt unknown` = lengths(st_intersects(nga, wpt_unkown)))
+```
+
+## Derive Variables
+
+Finding the percentage of water points that are functional and non-functional
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(`pct_functional` = `wpt_functional`/`total wpt`) %>%
+  mutate(`pct_non_functional` = `wpt non_functional`/`total wpt`)
+```
+
+Replacing all NA values in pct_functional and pct_non_functional with "0"
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>% mutate(pct_functional = replace_na(pct_functional, 0)) %>%
+  mutate(pct_non_functional = replace_na(pct_non_functional, 0))
+```
+
+Plotting the number of functional water points in the different regions.
+
+```{r}
+#| eval: false
+tmap_mode("plot")
+total <- qtm(nga_wp, "total wpt")
+wp_functional <- qtm(nga_wp, "wpt_functional")
+
+tmap_arrange(total, wp_functional, asp = 1, ncol = 2)
+```
+
+![](images/wpt_functional.png)
+
+Plotting the number of non-functional water points in the different regions.
+
+```{r}
+#| eval: false
+total <- qtm(nga_wp, "total wpt")
+wp_non_functional <- qtm(nga_wp, "wpt non_functional")
+
+tmap_arrange(total, wp_non_functional, asp = 1, ncol = 2)
+```
+
+![](images/wpt_nonfunctional.png)
+
+Plotting the percentage of functional water points in the different regions.
+
+```{r}
+#| eval: false
+total <- qtm(nga_wp, "total wpt")
+pct_wp_functional <- qtm(nga_wp, "pct_functional")
+
+tmap_arrange(total, pct_wp_functional, asp = 1, ncol = 2)
+```
+
+![](images/pct_functional.png)
+
+Plotting the percentage of non-functional water points in the different regions.
+
+```{r}
+#| eval: false
+total <- qtm(nga_wp, "total wpt")
+pct_wp_non_functional <- qtm(nga_wp, "pct_non_functional")
+
+tmap_arrange(total, pct_wp_non_functional, asp = 1, ncol = 2)
+```
+
+![](images/pct_nonfunctional.png)
+
+Checking the different values in X_water_tec.
+
+```{r}
+#| eval: false
+unique(wp$X_water_tec)
+```
+
+Finding the total number of Hand Pump water points.
+
+```{r}
+#| eval: false
+hand_pump_wpt <- wp %>%
+  filter(X_water_tec == "Hand Pump")
+```
+
+The code chunk below finds the Hand Pump Water points in polygon in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(`handpump_wpt` = lengths(st_intersects(nga, hand_pump_wpt)))
+```
+
+Finding the percentage of Hand Pump water points in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(`pct_hand_pump` = `handpump_wpt`/`total wpt`)
+```
+
+Replacing all NA values in pct_hand_pump with "0".
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>% mutate(pct_hand_pump = replace_na(pct_hand_pump, 0))
+```
+
+Plotting the percentage of Hand Pump water points in different regions.
+
+```{r}
+#| eval: false
+total <- qtm(nga_wp, "total wpt")
+pct_hand_pumpplot <- qtm(nga_wp, "pct_hand_pump")
+
+tmap_arrange(total, pct_hand_pumpplot, asp = 1, ncol = 2)
+```
+
+![](images/pct_handpump.png)
+
+Total water points with usage_cap less than 1000.
+
+```{r}
+#| eval: false
+usagecap_less1000 <- wp %>%
+  filter(usage_cap < 1000)
+```
+
+Total water points with usage_cap more than or equals to 1000.
+
+```{r}
+#| eval: false
+usagecap_more1000 <- wp %>%
+  filter(usage_cap >= 1000)
+```
+
+The code chunk below finds the Water points with less than 1000 usage capacity in polygon in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(`usagecap_less` = lengths(st_intersects(nga, usagecap_less1000)))
+```
+
+The code chunk below finds the Water points with more than or equals to 1000 usage capacity in polygon in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>%
+  mutate(`usagecap_more` = lengths(st_intersects(nga, usagecap_more1000)))
+```
+
+Finding the percentage of water points with less than 1000 usage capacity in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- mutate(nga_wp, `pct_usagecap_less` = `usagecap_less`/`total wpt`)
+```
+
+Finding the percentage of water points with more than or equals to 1000 usage capacity in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- mutate(nga_wp, `pct_usagecap_more` = `usagecap_more`/`total wpt`)
+```
+
+Replacing all NA values of pct_usagecap_less with "0"
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>% mutate(pct_usagecap_less = replace_na(pct_usagecap_less, 0))
+```
+
+Replacing all NA values of pct_usagecap_more with "0"
+
+```{r}
+#| eval: false
+nga_wp <- nga_wp %>% mutate(pct_usagecap_more = replace_na(pct_usagecap_more, 0))
+```
+
+Plotting the percentage of water points with usage capacity less than 1000 and percentage of water points with usage capacity more than or equals to 1000.
+
+```{r}
+#| eval: false
+pct_usagecap_lessplot <- qtm(nga_wp, "pct_usagecap_less")
+pct_usagecap_moreplot <- qtm(nga_wp, "pct_usagecap_more")
+
+tmap_arrange(pct_usagecap_lessplot, pct_usagecap_moreplot, asp = 1, ncol = 2)
+```
+
+![](images/pct_usagecap.png)
+
+Getting the total number of rural water points.
+
+```{r}
+#| eval: false
+rural <- wp %>%
+  filter(is_urban == "False")
+```
+
+The code chunk below finds the rural Water points in polygon in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- mutate(nga_wp, `rural_wp` = lengths(st_intersects(nga, rural)))
+```
+
+Finding the percentage of rural water points in different regions.
+
+```{r}
+#| eval: false
+nga_wp <- mutate(nga_wp, `pct_rural` = `rural_wp`/`total wpt`)
+```
+
+Replacing all NA values of pct_rual with "0"
+
+```{r}
+#| eval: false
+nga_wp <- mutate(nga_wp, pct_rural = replace_na(pct_rural, 0))
+```
+
+Plotting the percentage of rural water points in different regions.
+
+```{r}
+#| eval: false
+total <- qtm(nga_wp, "total wpt")
+pct_rural_plot <- qtm(nga_wp, "pct_rural")
+
+tmap_arrange(total, pct_rural_plot, asp = 1, ncol = 2)
+```
+
+![](images/pct_rural.png)
+
+We write the rds file so we are able to remove the rest of the large files.
+
+```{r}
+#| eval: false
+write_rds(nga_wp, "data/nga_wp.rds")
+```
+
+```{r}
+
+nga_wp <- read_rds("data/nga_wp.rds")
+```
+
+```{r}
+#| fig-width: 12
+#| fig-height: 10
+
+cols <- c(3,22,23,25,28,29,31)
+
+vars <- as.data.frame(nga_wp) %>% select(cols)
+
+cluster_var.cor = cor(vars[,2:7])
+corrplot.mixed(cluster_var.cor,
+               lower = "ellipse",
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+               tl.col = "black")
+```
+
+From the above analysis, we can see that the percentage of water points with usage capacity less than 1000 is highly correlated to percentage of hand pump water points and percentage of water points with usage capacity with more than or equals to 1000. In order to eliminate multicollinearity, we will not use pct_usagecap_less in our cluster analysis.
+
+Extracting clustering variables
+
+The code chunk below will be used to extract the clustering variables from the nga_wp
+
+```{r}
+cols <- c(3,21,22,24,28,30)
+cluster_vars <- nga_wp %>%
+  st_set_geometry(NULL) %>%
+  select(cols)
+head(cluster_vars)
+```
+
+Next, we change the rows by LGA names instead of row number by using the code chunk below.
+
+```{r}
+row.names(cluster_vars) <- cluster_vars$ADM2_EN
+head(cluster_vars,10)
+```
+
+The row numbers have been updated with the LGA names. We can now delete the column ADM2_EN by using the code chunk below.
+
+```{r}
+nga_mul_wp <- select(cluster_vars, c(2:6))
+head(nga_mul_wp, 10)
+```
+
+We will compute the proximity matrix by dist() of R. The code chunk below is used to compute the proximity matrix using euclidean method.
+
+```{r}
+proxmat <- dist(nga_mul_wp, method = "euclidean")
+```
+
+The code chunk below will list the content of proxmat for visual inspection.
+
+```{r}
+proxmat
+```
+
+Computing hierarchical clustering
+
+The code chunk below performs hierarchical clustering analysis using the ward.D method. The hierarchical clustering output is stored in an object of class hclust which describes the tree produced by the clustering process.
+
+```{r}
+hclust_ward <- hclust(proxmat, method = "ward.D")
+```
+
+We can then plot the tree by using plot() of R Graphics as shown in the code chunk below.
+
+```{r}
+plot(hclust_ward, cex = 0.3)
+```
+
+Selecting the optimal clustering algorithm
+
+One of the challenge in performing hierarchical clustering is to identify stronger clustering structures. The issue can solved by using agnes() function of cluster package. It functions like hclust(), however, with the agnes() function you can also get the agglomerative coefficient, which measures the amount of clustering structure found (values closer to 1 suggest strong clustering structure).
+
+The code chunk below will be used to compute the agglomerative coefficients of all hierarchical clustering algorithms.
+
+```{r}
+m <- c("average", "single", "complete", "ward")
+names(m) <- c("average", "single", "complete", "ward")
+
+ac <- function(x) {
+  agnes(nga_mul_wp, method = x)$ac
+}
+
+map_dbl(m, ac)
+```
+
+With reference to the output above, we can see that the Ward's method provides the strongest clustering structure among the four methods assessed. Hence, in the subsequent analysis, only Ward's method will be used.
+
+Determining Optimal Clusters
+
+Another technical challenge faced by data analyst in performing clustering analysis is to determine the optimal clusters to retain.
+
+There are three commonly used methods to determine the optimal clusters, they are:
+
+Elbow method Average Silhouette method Gap Statistic method
+
+Gap Statistic method
+
+The gap statistic method compares the total within intra-cluster variation for different values of k with their expected values under null reference distribution of the data. The estimate of the optimal clusters will be value that maximise the gap statistic (i.e. that yields the largest gap statistic). This means that the clustering structure is far away from the random uniform distribution of points.
+
+To compute the gap statitic, clusGap() of cluster package will be used.
+
+```{r}
+set.seed(12345)
+gap_stat <- clusGap(nga_mul_wp, FUN = hcut, nstart = 25,
+                    K.max = 10, B = 50)
+print(gap_stat, method = "firstmax")
+```
+
+Also, note that the hcut function used is from factoextra package.
+
+Next, we can visualise the plot by using the fviz.gap_stat() of factoextra package.
+
+```{r}
+fviz_gap_stat(gap_stat)
+```
+
+With reference to the gap statistic graph above, the recommended number of clusters is to retain is 9.
+
+It is possible to draw the dengrogram with a border around the selected clusters by using rect.hclust() of R stats. The arguement border is used to specify the border colours for the rectangles.
+
+```{r}
+plot(hclust_ward, cex=0.3)
+rect.hclust(hclust_ward, k=9, border = 2:5)
+```
+
+Transforming the data frame into a matrix
+
+The data was loaded into a data frame but it has to be a data matrix to be a heatmap.
+
+The code chunk below will be used to transform nga_wp data frame into a data matrix.
+
+```{r}
+nga_mul_wp_mat <- data.matrix(nga_mul_wp)
+```
+
+Plotting interactive cluster heatmap using heatmaply()
+
+In the code chunk below, the heatmaply() of heatmaply package is used to build an interactive cluster heatmap.
+
+```{r}
+heatmaply(normalize(nga_mul_wp_mat), Colv = NA, dist_method = "eclidena", hclust_method = "ward.D", seriate = "OLO", colors = Blues, k_row = 9, margins = c(NA, 200, 60, NA), fontsize_row = 4, fontsize_col = 5, main = "Geographic Segmentation of Nigeria LGA by Multivariate Water Point Attributes", xlab = "Water point Attributes", ylab = "Nigeria LGA")
+```
+
+cutree() of R Base will be used in the code chunk below to derive a 9-cluster model.
+
+```{r}
+groups <- as.factor(cutree(hclust_ward, k=9))
+```
+
+In order to visualise the clusters, the groups object needs to be appended onto nga_wp.
+
+The code chunk below form the join in three steps:
+
+the groups list object will be converted into a matrix; cbind() is used to append groups matrix onto nga_wp to produce an output simple feature object called nga_wp_cluster; and rename of dplyr package is used to rename as.matrix.groups field as CLUSTER.
+
+```{r}
+nga_wp_cluster <- cbind(nga_wp, as.matrix(groups)) %>%
+  rename(`CLUSTER` = `as.matrix.groups.`)
+```
+
+Next, qtm() of tmap package is used to plot the choropleth map showing the cluster formed.
+
+```{r}
+qtm(nga_wp_cluster, "CLUSTER")
+```
+
+Spatially Constrained Clustering: SKATER approach
+
+Converting into Spatial Polygons Data Frame
+
+First, we need to convert nga_wp into Spatial Polygons Data Frame. This is because SKATER function only support sp objects such as Spatial Polygon Data Frame.
+
+The code chunk below uses as_Spatial() of sf package to convert nga_wp into a Spatial Polygon Data Frame called nga_sp.
+
+```{r}
+nga_sp <- as_Spatial(nga_wp)
+```
+
+Computing Neighbour List
+
+poly2nb() of spdep package will be used to compute the neighbours list from polygon list.
+
+```{r}
+nga_nb <- poly2nb(nga_sp)
+summary(nga_nb)
+```
+
+We can plot the neighbours list on nga_sp by using the code chunk below. Since we now cna plot the area boundaries as well, we plot this graph on top of the map. The first plot command gives the boundaries. This is followed by the plot of the neighbour list object, with coordinates applied to the original Spatial Polygon Data Frame to extract the centroids of the polygon. These are used as the nodes for the graph representation. We also set the colour to blue and specify add=TRUE to plot the network on top of the boundaries.
+
+```{r}
+plot(nga_sp, border=grey(.5))
+plot(nga_nb, coordinates(nga_sp), col = "blue", add = TRUE)
+```

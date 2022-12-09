@@ -83,6 +83,8 @@ freq(data = wp_nga, input='status_cle')
 
 ![](pics/status_cle.png)
 
+![](images/paste-5A7D8FB6.png)
+
 **Extracting Water Data Point**
 
 In this section, we will extract the water point records by using classes in status_cle field.
@@ -101,6 +103,8 @@ freq(data = wpt_functional, input = 'status_cle')
 ```
 
 ![](pics/func.png){fig-align="center"}
+
+![](images/paste-1FDCFC72.png)
 
 **Extracting non-funtional water point**
 
