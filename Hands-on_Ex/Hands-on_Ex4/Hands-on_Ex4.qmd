@@ -546,7 +546,7 @@ In addition to regression residuals, the output feature class table includes fie
 
 -   Coefficient Standard Error: these values measure the reliability of each coefficient estimate. Confidence in those estimates are higher when standard errors are small in relation to the actual coefficient values. Large standard errors may indicate problems with local collinearity.
 
-    They are all stored in a SpatialPointsDataFrame or Spatial Polygons Data Frame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its \"data\" slot in an object called **SDF** of the output list.
+    They are all stored in a SpatialPointsDataFrame or Spatial Polygons Data Frame object integrated with fit.points, GWR coefficient estimates, y value, predicted values, coefficient standard errors and t-values in its "data" slot in an object called **SDF** of the output list.
 
 ### 6.9.4 Converting SDF into sf data.frame
 
