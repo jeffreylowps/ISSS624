@@ -35,7 +35,7 @@ nga <- st_read(dsn = "data", layer = "nga_admbnda_adm2_osgof_20190417", crs=4326
 
 ## Duplicate Shape
 
-Credit to Anica for the additional code 8)
+Credit to Anica Galano for the additional codes to resolve duplicate names.
 
 ```{r}
 #| eval: false
