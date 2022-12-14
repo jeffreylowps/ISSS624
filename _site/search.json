@@ -74,6 +74,27 @@
     "href": "Take-home_Ex/Take-home_Ex2/Take-home_Ex2.html#duplicate-shape",
     "title": "Take Home Exercise 2",
     "section": "Duplicate Shape",
-    "text": "Duplicate Shape\nCredit to Anica for the additional code 8)\n\nnga <- (nga[order(nga$ADM2_EN), ])\n\nduplicate_area <- nga$ADM2_EN[ nga$ADM2_EN %in% nga$ADM2_EN[duplicated(nga$ADM2_EN)] ]\n\nduplicate_area\n\n\nduplicates <- unique(duplicate_area)\n\nfind_rows <- function(x) {\n  which(nga$ADM2_EN == x)\n}\n\nto_replace <- c()\n\nfor (x in duplicates){\n  to_replace <- append(to_replace, as.vector(find_rows(x)))\n}\n\nto_replace\n\n\nnew_LGA_names <- c()\n\nfor (x in to_replace){\nnew_LGA_names <- append(new_LGA_names, paste(nga$ADM2_EN[x],\"(\", nga$ADM1_EN[x], \")\"))\n}\n\nnew_LGA_names\n\n\nnga$ADM2_EN[to_replace]  <- new_LGA_names\n\nduplicate_area <- nga$ADM2_EN[ nga$ADM2_EN %in% nga$ADM2_EN[duplicated(nga$ADM2_EN)] ]\n\nduplicate_area"
+    "text": "Duplicate Shape\nCredit to Anica Galano for the additional codes to resolve duplicate names.\n\nnga <- (nga[order(nga$ADM2_EN), ])\n\nduplicate_area <- nga$ADM2_EN[ nga$ADM2_EN %in% nga$ADM2_EN[duplicated(nga$ADM2_EN)] ]\n\nduplicate_area\n\n\nduplicates <- unique(duplicate_area)\n\nfind_rows <- function(x) {\n  which(nga$ADM2_EN == x)\n}\n\nto_replace <- c()\n\nfor (x in duplicates){\n  to_replace <- append(to_replace, as.vector(find_rows(x)))\n}\n\nto_replace\n\n\nnew_LGA_names <- c()\n\nfor (x in to_replace){\nnew_LGA_names <- append(new_LGA_names, paste(nga$ADM2_EN[x],\"(\", nga$ADM1_EN[x], \")\"))\n}\n\nnew_LGA_names\n\n\nnga$ADM2_EN[to_replace]  <- new_LGA_names\n\nduplicate_area <- nga$ADM2_EN[ nga$ADM2_EN %in% nga$ADM2_EN[duplicated(nga$ADM2_EN)] ]\n\nduplicate_area"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "ISSS624",
+    "section": "",
+    "text": "--- title: “ISSS624” ---"
+  },
+  {
+    "objectID": "index.html#student-jeffrey-low",
+    "href": "index.html#student-jeffrey-low",
+    "title": "ISSS624",
+    "section": "Student: Jeffrey Low",
+    "text": "Student: Jeffrey Low"
+  },
+  {
+    "objectID": "index.html#welcome-to-isss624-geospatial-analytics-applications",
+    "href": "index.html#welcome-to-isss624-geospatial-analytics-applications",
+    "title": "ISSS624",
+    "section": "Welcome to ISSS624 Geospatial Analytics Applications!",
+    "text": "Welcome to ISSS624 Geospatial Analytics Applications!\nIn this webpage, I am going to share with you my learning journey of geospatial analytics."
   }
 ]
