@@ -14,7 +14,7 @@ This is Take Home Exercise 2
 ```{r}
 pacman::p_load(rgdal, spdep, tmap, sf, ClustGeo, 
                ggpubr, cluster, factoextra, NbClust,
-               heatmaply, corrplot, psych, tidyverse)
+               heatmaply, corrplot, psych, tidyverse, GGally)
 ```
 
 ## Importing the Water Point Data
@@ -33,9 +33,7 @@ nga <- st_read(dsn = "data", layer = "nga_admbnda_adm2_osgof_20190417", crs=4326
 
 # Data Wrangling
 
-## Duplicate ShapeNames
-
-(Remember to credit BUT ONLY INSPIRED BY [Jordan](https://jordan-isss624-geospatial.netlify.app/posts/geo/geospatial_exercise/#data-wrangling))
+## Duplicate Shape
 
 Credit to Anica for the additional code 8)
 
@@ -190,7 +188,7 @@ nga_wp <- nga_wp %>% mutate(pct_functional = replace_na(pct_functional, 0)) %>%
   mutate(pct_non_functional = replace_na(pct_non_functional, 0))
 ```
 
-Plotting the number of functional water points in the different regions.
+#### Plotting the number of functional water points in the different regions
 
 ```{r}
 #| eval: false
@@ -203,7 +201,7 @@ tmap_arrange(total, wp_functional, asp = 1, ncol = 2)
 
 ![](images/wpt_functional.png)
 
-Plotting the number of non-functional water points in the different regions.
+#### Plotting the number of non-functional water points in the different regions
 
 ```{r}
 #| eval: false
@@ -215,7 +213,7 @@ tmap_arrange(total, wp_non_functional, asp = 1, ncol = 2)
 
 ![](images/wpt_nonfunctional.png)
 
-Plotting the percentage of functional water points in the different regions.
+#### Plotting the percentage of functional water points in the different regions
 
 ```{r}
 #| eval: false
@@ -227,7 +225,7 @@ tmap_arrange(total, pct_wp_functional, asp = 1, ncol = 2)
 
 ![](images/pct_functional.png)
 
-Plotting the percentage of non-functional water points in the different regions.
+#### Plotting the percentage of non-functional water points in the different regions
 
 ```{r}
 #| eval: false
@@ -239,14 +237,14 @@ tmap_arrange(total, pct_wp_non_functional, asp = 1, ncol = 2)
 
 ![](images/pct_nonfunctional.png)
 
-Checking the different values in X_water_tec.
+#### Checking the different values in X_water_tec
 
 ```{r}
 #| eval: false
 unique(wp$X_water_tec)
 ```
 
-Finding the total number of Hand Pump water points.
+#### Finding the total number of Hand Pump water points
 
 ```{r}
 #| eval: false
@@ -262,7 +260,7 @@ nga_wp <- nga_wp %>%
   mutate(`handpump_wpt` = lengths(st_intersects(nga, hand_pump_wpt)))
 ```
 
-Finding the percentage of Hand Pump water points in different regions.
+#### Finding the percentage of Hand Pump water points in different regions
 
 ```{r}
 #| eval: false
@@ -277,7 +275,7 @@ Replacing all NA values in pct_hand_pump with "0".
 nga_wp <- nga_wp %>% mutate(pct_hand_pump = replace_na(pct_hand_pump, 0))
 ```
 
-Plotting the percentage of Hand Pump water points in different regions.
+#### Plotting the percentage of Hand Pump water points in different regions
 
 ```{r}
 #| eval: false
@@ -289,7 +287,7 @@ tmap_arrange(total, pct_hand_pumpplot, asp = 1, ncol = 2)
 
 ![](images/pct_handpump.png)
 
-Total water points with usage_cap less than 1000.
+#### Total water points with usage_cap less than 1000
 
 ```{r}
 #| eval: false
@@ -297,7 +295,7 @@ usagecap_less1000 <- wp %>%
   filter(usage_cap < 1000)
 ```
 
-Total water points with usage_cap more than or equals to 1000.
+#### Total water points with usage_cap more than or equals to 1000
 
 ```{r}
 #| eval: false
@@ -321,14 +319,14 @@ nga_wp <- nga_wp %>%
   mutate(`usagecap_more` = lengths(st_intersects(nga, usagecap_more1000)))
 ```
 
-Finding the percentage of water points with less than 1000 usage capacity in different regions.
+#### Finding the percentage of water points with less than 1000 usage capacity in different regions
 
 ```{r}
 #| eval: false
 nga_wp <- mutate(nga_wp, `pct_usagecap_less` = `usagecap_less`/`total wpt`)
 ```
 
-Finding the percentage of water points with more than or equals to 1000 usage capacity in different regions.
+#### Finding the percentage of water points with more than or equals to 1000 usage capacity in different regions
 
 ```{r}
 #| eval: false
@@ -349,7 +347,7 @@ Replacing all NA values of pct_usagecap_more with "0"
 nga_wp <- nga_wp %>% mutate(pct_usagecap_more = replace_na(pct_usagecap_more, 0))
 ```
 
-Plotting the percentage of water points with usage capacity less than 1000 and percentage of water points with usage capacity more than or equals to 1000.
+#### Plotting the percentage of water points with usage capacity less than 1000 and percentage of water points with usage capacity more than or equals to 1000
 
 ```{r}
 #| eval: false
@@ -361,7 +359,7 @@ tmap_arrange(pct_usagecap_lessplot, pct_usagecap_moreplot, asp = 1, ncol = 2)
 
 ![](images/pct_usagecap.png)
 
-Getting the total number of rural water points.
+#### Getting the total number of rural water points
 
 ```{r}
 #| eval: false
@@ -376,7 +374,7 @@ The code chunk below finds the rural Water points in polygon in different region
 nga_wp <- mutate(nga_wp, `rural_wp` = lengths(st_intersects(nga, rural)))
 ```
 
-Finding the percentage of rural water points in different regions.
+#### Finding the percentage of rural water points in different regions
 
 ```{r}
 #| eval: false
@@ -390,7 +388,7 @@ Replacing all NA values of pct_rual with "0"
 nga_wp <- mutate(nga_wp, pct_rural = replace_na(pct_rural, 0))
 ```
 
-Plotting the percentage of rural water points in different regions.
+#### Plotting the percentage of rural water points in different regions
 
 ```{r}
 #| eval: false
@@ -433,7 +431,7 @@ corrplot.mixed(cluster_var.cor,
 
 From the above analysis, we can see that the percentage of water points with usage capacity less than 1000 is highly correlated to percentage of hand pump water points and percentage of water points with usage capacity with more than or equals to 1000. In order to eliminate multicollinearity, we will not use pct_usagecap_less in our cluster analysis.
 
-Extracting clustering variables
+### Extracting clustering variables
 
 The code chunk below will be used to extract the clustering variables from the nga_wp
 
@@ -471,7 +469,7 @@ The code chunk below will list the content of proxmat for visual inspection.
 proxmat
 ```
 
-Computing hierarchical clustering
+### Computing hierarchical clustering
 
 The code chunk below performs hierarchical clustering analysis using the ward.D method. The hierarchical clustering output is stored in an object of class hclust which describes the tree produced by the clustering process.
 
@@ -485,7 +483,7 @@ We can then plot the tree by using plot() of R Graphics as shown in the code chu
 plot(hclust_ward, cex = 0.3)
 ```
 
-Selecting the optimal clustering algorithm
+### Selecting the optimal clustering algorithm
 
 One of the challenge in performing hierarchical clustering is to identify stronger clustering structures. The issue can solved by using agnes() function of cluster package. It functions like hclust(), however, with the agnes() function you can also get the agglomerative coefficient, which measures the amount of clustering structure found (values closer to 1 suggest strong clustering structure).
 
@@ -504,7 +502,7 @@ map_dbl(m, ac)
 
 With reference to the output above, we can see that the Ward's method provides the strongest clustering structure among the four methods assessed. Hence, in the subsequent analysis, only Ward's method will be used.
 
-Determining Optimal Clusters
+### Determining Optimal Clusters
 
 Another technical challenge faced by data analyst in performing clustering analysis is to determine the optimal clusters to retain.
 
@@ -512,7 +510,7 @@ There are three commonly used methods to determine the optimal clusters, they ar
 
 Elbow method Average Silhouette method Gap Statistic method
 
-Gap Statistic method
+### Gap Statistic method
 
 The gap statistic method compares the total within intra-cluster variation for different values of k with their expected values under null reference distribution of the data. The estimate of the optimal clusters will be value that maximise the gap statistic (i.e. that yields the largest gap statistic). This means that the clustering structure is far away from the random uniform distribution of points.
 
@@ -542,7 +540,7 @@ plot(hclust_ward, cex=0.3)
 rect.hclust(hclust_ward, k=9, border = 2:5)
 ```
 
-Transforming the data frame into a matrix
+#### Transforming the data frame into a matrix
 
 The data was loaded into a data frame but it has to be a data matrix to be a heatmap.
 
@@ -552,7 +550,7 @@ The code chunk below will be used to transform nga_wp data frame into a data mat
 nga_mul_wp_mat <- data.matrix(nga_mul_wp)
 ```
 
-Plotting interactive cluster heatmap using heatmaply()
+#### Plotting interactive cluster heatmap using heatmaply()
 
 In the code chunk below, the heatmaply() of heatmaply package is used to build an interactive cluster heatmap.
 
@@ -583,9 +581,9 @@ Next, qtm() of tmap package is used to plot the choropleth map showing the clust
 qtm(nga_wp_cluster, "CLUSTER")
 ```
 
-Spatially Constrained Clustering: SKATER approach
+### Spatially Constrained Clustering: SKATER approach
 
-Converting into Spatial Polygons Data Frame
+#### Converting into Spatial Polygons Data Frame
 
 First, we need to convert nga_wp into Spatial Polygons Data Frame. This is because SKATER function only support sp objects such as Spatial Polygon Data Frame.
 
@@ -595,12 +593,18 @@ The code chunk below uses as_Spatial() of sf package to convert nga_wp into a Sp
 nga_sp <- as_Spatial(nga_wp)
 ```
 
-Computing Neighbour List
+### Computing Neighbour List
 
 poly2nb() of spdep package will be used to compute the neighbours list from polygon list.
 
 ```{r}
+nga_sp <- nga_sp[-86,]
+```
+
+```{r}
+
 nga_nb <- poly2nb(nga_sp)
+
 summary(nga_nb)
 ```
 
@@ -609,4 +613,237 @@ We can plot the neighbours list on nga_sp by using the code chunk below. Since w
 ```{r}
 plot(nga_sp, border=grey(.5))
 plot(nga_nb, coordinates(nga_sp), col = "blue", add = TRUE)
+```
+
+Note that if we plot the network first and then the boundaries, some of the areas will be clipped. This is because the plotting area is determined by the characteristics of the first plot. In this example, because the boundary map extends further than the graph, we plot it first.
+
+### Computing Minimum Spanning Tree
+
+#### Calculating edge costs
+
+Next, nbcosts() of spdep package is used to compute the cost of each edge. It is the distance between its nodes. This function compute this distance using a data.frame with observations vector in each node.
+
+The code chunk below is used to compute the cost of each edge.
+
+```{r}
+lcosts <- nbcosts(nga_nb, nga_mul_wp)
+```
+
+For each observation, this gives the pairwise dissimilarity between its values on the variables and the values for the neighbouring observations (from the neighbour list). Basically, this is the notion of a generalised weight for a spatial weights matrix.
+
+Next, we will incorporate these costs into a weights object in the same way as we did in the calculation of inverse of distance weights. In other words, we convert the neighbour list to a list weights object by specifying the just computed lcosts as the weights.
+
+In order to achieve this, nb2listw() of spdep package is used as shown in the code chunk below.
+
+Note that we specify the style as B to make sure the cost values are not standardised.
+
+```{r}
+nga.w <- nb2listw(nga_nb, lcosts, style = "B")
+summary(nga.w)
+```
+
+Computing Minimum Spanning Tree
+
+The minimum spanning tree is computed by mean of the mstree() of spdep package as shown in the code chunk below.
+
+```{r}
+nga.mst <- mstree(nga.w)
+```
+
+After computing the MST, we can check its class and dimension by using the code chunk below.
+
+```{r}
+class(nga.mst)
+```
+
+```{r}
+dim(nga.mst)
+```
+
+Note that the dimension is 772 not 773. This is because the minimum spanning tree consists of n-1 edges (links) in order to transverse all the nodes.
+
+We can display the content of nga.mst by using head() as shown in the code chunk below.
+
+```{r}
+head(nga.mst)
+```
+
+The plot method for MST include a way to show the observation numbers of the nodes in addition to the edge. As before, we plot this together with the boundaries. We can see how the initial neighbour list is simplified to just one edge connecting each of the nodes, while passing through all the nodes.
+
+```{r}
+plot(nga_sp, border=gray(.5))
+plot.mst(nga.mst, coordinates(nga_sp), col="blue", cex.labels = 0.7, cex.circles = 0.005, add = TRUE)
+```
+
+### Computing spatially constrained clusters using SKATER method
+
+The code chunk below compute the spatially constrained cluster using skater() of spdep package.
+
+```{r}
+clust9 <- spdep::skater(edges = nga.mst[,1:2], data = nga_mul_wp, method = "euclidean", ncuts = 8)
+```
+
+The skater() takes three mandatory arguments:- the first two columns of the MST matrix (i.e. not the cost), - the data matrix (to update the costs as units are being grouped), and - the number of cuts. Note: It is set to one less than the number of clusters. So, the value specified is not the number of clusters, but the number of cuts in the graph, one less than the number of clusters.
+
+The result of the skater() is an object of class skater. We can examine its contents by using the code chunk below.
+
+```{r}
+str(clust9)
+```
+
+The most interesting component of the list structure is the groups vector containing the labels of the cluster to which each observation belongs (as before, the label itself is arbitary). This is followed by a detailed summary for each of the clusters in the edges.group list. Sum of squares measures are given as SSTO for the total and SSW to show the effect of each of the cuts on the overall criterion.
+
+We can check the cluster assignment by using the code chunk below.
+
+```{r}
+ccs9 <- clust9$groups
+ccs9
+```
+
+We can find out how many observations are in each cluster by means of the table command. Parenthetially, we can also find this as the dimension of each vector in the lists contained in edges.groups.
+
+```{r}
+table(ccs9)
+```
+
+Last;y, we can also plot the pruned that shows the nine clusters on top of the LGA area.
+
+```{r}
+plot(nga_sp, border=gray(.5))
+plot(clust9, coordinates(nga_sp), cex.lab=.7, groups.colours=c("red", "blue", "green", "brown ", "pink", "black", "orange", "yellow", "gray"), cex.circles=0.005, add=TRUE)
+```
+
+### Visualising the clusters in choropleth map
+
+The code chunk below is used to plot the newly derived clusters by using SKATER method.
+
+```{r}
+nga_wp_cluster <- nga_wp_cluster[-86,]
+```
+
+```{r}
+groups_mat <- as.matrix(clust9$groups)
+nga_wp_spatialcluster <- cbind(nga_wp_cluster, as.factor(groups_mat)) %>%
+  rename(`SP_CLUSTER` = `as.factor.groups_mat.`)
+qtm(nga_wp_spatialcluster, "SP_CLUSTER")
+```
+
+For easy comparison, it will be better to place both the hierarchical clustering and spatially constrained hierarchical clustering maps next to each other.
+
+```{r}
+hclust.map <- qtm(nga_wp_cluster, "CLUSTER") + tm_borders(alpha = 0.5) + tm_layout(legend.outside = FALSE, legend.stack = "vertical", legend.text.size = 0.3, legend.title.size = 0.3)
+
+ngaclust.map <- qtm(nga_wp_spatialcluster, "SP_CLUSTER") + tm_borders(alpha = 0.5) + tm_layout(legend.outside = FALSE, legend.stack = "vertical", legend.text.size = 0.3, legend.title.size = 0.3)
+
+tmap_arrange(hclust.map, ngaclust.map, asp = NA, ncol = 2)
+```
+
+### Spatially Constrained Clustering: ClustGeo Method
+
+In this section, we will gain hands-on experience on using functions provided by ClustGeo package to perform non-spatially constrained hierarchical cluster analysis and spatially constrained cluster analysis.
+
+#### Ward-like hierarchical clustering: ClustGeo
+
+ClustGeo package provides function called hclustgeo() to perform a typical Ward-like hierarchical clustering just like hclust() you learned in previous section.
+
+To perform non-spatially constrained hierarchical clustering, we only need to provide the function a dissmilarity matrix as shown in the code chunk below.
+
+```{r}
+nongeo_cluster <- hclustgeo(proxmat)
+plot(nongeo_cluster, cex=0.5)
+rect.hclust(nongeo_cluster, k=9, border = 2:5)
+```
+
+Note that the dissimilarity matrix must be an object of class dist, i.e. an object obtained with the function dist().
+
+#### Mapping the clusters formed
+
+Similarly. we can plot the clusters on a categorical area shaded map.
+
+```{r}
+groups <- as.factor(cutree(nongeo_cluster, k=9))
+```
+
+```{r}
+nga_wp_ngeo_cluster <- cbind(nga_wp, as.matrix(groups)) %>%
+  rename(`CLUSTER` = `as.matrix.groups.`)
+```
+
+```{r}
+qtm(nga_wp_ngeo_cluster, "CLUSTER") + tm_layout(legend.outside = FALSE, legend.stack = "vertical", legend.text.size = 0.5, legend.title.size = 0.4)
+```
+
+Spatially Constrained Hierarchical Clustering
+
+Before we can perform spatially constrained hierarchical clustering, a spatial distance matrix will be derived by using st_distance() of sf package.
+
+```{r}
+dist <- st_distance(nga_wp, nga_wp)
+distmat <- as.dist(dist)
+```
+
+Notice that as.dist() is used to convert the data frame into matrix.
+
+Next, choicealpha () will be used to determine a suitable value for the mixing parameter alpha as shown in the code chunk below.
+
+```{r}
+cr <- choicealpha(proxmat, distmat, range.alpha = seq(0, 1, 0.1), K=9, graph=TRUE)
+```
+
+With reference to the graphs above, alpha=0.3 will be used as shown in the code chunk below.
+
+```{r}
+clustG <- hclustgeo(proxmat, distmat, alpha = 0.3)
+```
+
+Next, custree() is used to derive the cluster object.
+
+```{r}
+groups <- as.factor(cutree(clustG, k=9))
+```
+
+We will then join back the group list with nga_wp polygon feature data frame by using the code chunk below.
+
+```{r}
+nga_wp_Gcluster <- cbind(nga_wp, as.matrix(groups)) %>%
+  rename(`CLUSTER` = `as.matrix.groups.`)
+```
+
+We can now plot the map of the new delineated spatially constrained clusters.
+
+```{r}
+qtm(nga_wp_Gcluster, "CLUSTER") + tm_layout(legend.outside = FALSE, legend.stack = "vertical", legend.text.size = 0.5, legend.title.size = 0.4)
+```
+
+### Visual Interpretation of Clusters
+
+#### Visualising Individual clustering variable
+
+Code chunk below is used to reveal the distribution of a clustering variable (pct_rural) by cluster.
+
+```{r}
+ggplot(data = nga_wp_ngeo_cluster, aes(x= CLUSTER, y = pct_rural)) + geom_boxplot()
+```
+
+The boxplot reveals Cluster 6 displays the highest mean percentage of rural waterpoints follwed by Cluster 9, 8, 3, 4, 5, 7, 1 and 2.
+
+#### Multivariate Visualisation
+
+Past studies shown that parallel coordinate plot can be used to reveal clustering variables by cluster very effectively. In the code chunk below, ggparcoord() of GGally package.
+
+```{r}
+ggparcoord(data = nga_wp_ngeo_cluster, columns = c(21, 22, 24, 28, 30), scale = 'globalminmax', alphaLines = 0.2, boxplot = TRUE, title = "Multiple Parallel Coordinates Plots of ICT Variables by Cluster") + facet_grid(~ CLUSTER) + theme(axis.text.x = element_text(angle = 30))
+```
+
+The parallel coordinate plot above reveals that the percentage of rural waterpoints and the percentage of functional waterpoints are highest in Cluster 6. Cluster 2 seems to be the lowest in all percentages.
+
+Last but not least, we can also compute the summary statistics such as mean, median , sd, etc to complement the visual interpretation.
+
+In the code chunk below, group_by() and summarise() of dplyr are used to derive mean values of the clustering variables.
+
+```{r}
+nga_wp_ngeo_cluster %>%
+  st_set_geometry(NULL) %>%
+  group_by(CLUSTER) %>%
+  summarise(mean_pct_functional = mean(pct_functional), mean_pct_non_functional = mean(pct_non_functional), mean_pct_hand_pump = mean(pct_hand_pump), mean_pct_usagecap_more = mean(pct_usagecap_more), mean_pct_rural = mean(pct_rural))
 ```
