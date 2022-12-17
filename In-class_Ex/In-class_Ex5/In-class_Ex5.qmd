@@ -1,0 +1,243 @@
+---
+title: "In Class Exercise 5"
+editor: visual
+---
+
+# Geographically Weighted Logistic Regression (GWLR) and Application
+
+## Overview
+
+### In Class Exercise 5
+
+## Getting Started
+
+### Installing R packages
+
+We will install he following R packages for this In-Class Exercise:
+
+sf, tidyverse, funModeling, blorr, corrplot, ggpubr, spdep, GWmodel, tmap, skimr, caret, report
+
+```{r}
+pacman::p_load(sf, tidyverse, funModeling, blorr, corrplot, ggpubr, spdep, GWmodel, tmap, skimr, caret, report)
+```
+
+### Importing Data
+
+First, we are going to import the water point data in R environment.
+
+```{r}
+Osun <- read_rds("rds/Osun.rds")
+Osun_wp_sf <- read_rds("rds/Osun_wp_sf.rds")
+```
+
+### Viewing Functional & Non-functional
+
+We can view the percentage of functional water points and the percentage of non functional water points in Osun using the code chunk below.
+
+```{r}
+Osun_wp_sf %>%
+  freq(input = 'status')
+```
+
+We can see that 44.5% of the water points in Osun are non-functional.
+
+### Plotting the water points
+
+The below plot allows us to see the locations of the functional and the non-functional water points plotted on the map of Osun.
+
+```{r}
+tmap_mode("view")
+tm_shape(Osun) +
+# tmap_option
+  tm_polygons(alpha = 0.4) +
+  tm_shape(Osun_wp_sf) +
+  tm_dots(col = "status", alpha = 0.6) +
+  tm_view(set.zoom.limits = c(9, 12))
+```
+
+### Data Wrangling
+
+The below code chunk using the skim() function allows us to see which variables have missing values and we should exclude them from our analysis.
+
+```{r}
+Osun_wp_sf %>%
+  skim()
+```
+
+### Creating new Data Frame
+
+The code chunk below creates a new sf data frame dropping the variables with missing values.
+
+```{r}
+Osun_wp_sf_clean <- Osun_wp_sf %>%
+  filter_at(vars(status, distance_to_primary_road, distance_to_secondary_road, distance_to_tertiary_road, distance_to_city, distance_to_town, water_point_population, local_population_1km, usage_capacity, is_urban, water_source_clean), all_vars(!is.na(.))) %>%
+              mutate(usage_capacity = as.factor(usage_capacity))
+```
+
+Things to learn from code chunk above. We have dropped the variables that have missing values and it will irrelevant if we have included them because we will be losing data points that we need to analyse if we have included variables with missing values.
+
+```{r}
+Osun_wp <- Osun_wp_sf_clean %>%
+  select(c(7, 35:39, 42:43, 46:47, 57)) %>%
+  st_set_geometry(NULL)
+```
+
+### Correlation Matrix
+
+The code chunk below will plot the correlation matrix for variables from columns 2 to 7 of the osun_wp data frame, which are the quantitative data. This is to check for multicollinearity between the independent variables.
+
+```{r}
+cluster_vars.cor = cor(Osun_wp[, 2:7])
+corrplot.mixed(cluster_vars.cor, lower = "ellipse", upper = "number", tl.pos = "lt", diag = "l", tl.col = "black")
+```
+
+### Logistic Regression
+
+The below code chunk constructs the model for the logistic regression for our sf data frame, osun_wp_sf_clean.
+
+```{r}
+model <- glm(status ~ distance_to_primary_road + distance_to_secondary_road + distance_to_tertiary_road + distance_to_city + distance_to_town + is_urban + usage_capacity + water_source_clean + water_point_population + local_population_1km, data = Osun_wp_sf_clean, family = binomial(link = 'logit'))
+```
+
+### Bayesian Linear Regression
+
+Instead of using typical R report, we use the blr_regress of blorr package is used to check the model overview and observe the maximum likelihood estimates and the respective p-values to check if they are significant.
+
+```{r}
+blr_regress(model)
+```
+
+Now we view the report of the model with the code chunk below.
+
+```{r}
+report(model)
+```
+
+We can see from the above report that the following variables,
+
+1.  distance_to_primary_road
+
+2.  distance_to_secondary_road
+
+are insignificant and we should consider excluding them in the further analysis. We create a new "model2" to exclude the 2 insignificant variables.
+
+### Creating New Model
+
+The code chunk below creates a new model without the 2 insignificant variables
+
+```{r}
+model2 <- glm(status ~ distance_to_tertiary_road + distance_to_city + distance_to_town + is_urban + usage_capacity + water_source_clean + water_point_population + local_population_1km, data = Osun_wp_sf_clean, family = binomial(link = 'logit'))
+```
+
+```{r}
+blr_regress(model2)
+```
+
+Now we view the report of the model with the code chunk below.
+
+```{r}
+report(model2)
+```
+
+### Confusion Matrix
+
+The code chunk below generates the confusion matrix for the model.
+
+```{r}
+blr_confusion_matrix(model2, cutoff = 0.5)
+```
+
+The validity of a cut-off is measured using sensitivity, specificity and accuracy.
+
+Sensitivity: The % of correctly classified events out of all events = TP/(TP + FN)
+
+Specificity: The % of correctly classified non-events out of all non-events = TN/(TN + FP)
+
+Accuracy: The % of correctly classified observation over all observations = (TP + TN)/(TP + FP + TN + FN)
+
+The code chunk below creates a spatial data frame.
+
+```{r}
+Osun_wp_sp <- Osun_wp_sf_clean %>%
+  select(c(status, distance_to_tertiary_road, distance_to_city, distance_to_town, water_point_population, local_population_1km, is_urban, usage_capacity, water_source_clean)) %>%
+  as_Spatial()
+Osun_wp_sp
+```
+
+### Fixed Bandwidth
+
+The code chunk below will generate the fixed bandwidth for our spatial data frame.
+
+```{r}
+bw.fixed <- bw.ggwr(status ~ distance_to_tertiary_road + distance_to_city + distance_to_town + is_urban + usage_capacity + water_source_clean + water_point_population + local_population_1km, data = Osun_wp_sp, family = "binomial", approach = "AIC", kernel = "gaussian", adaptive = FALSE, longlat = FALSE)
+```
+
+```{r}
+bw.fixed
+```
+
+### Geographically Weighted Logistic Regression (GWLR)
+
+The code chunk below will construct the Geographically Weighted Logistic Regression using the fixed bandwidth that we just derived.
+
+```{r}
+gwlr.fixed <- ggwr.basic(status ~ distance_to_tertiary_road + distance_to_city + distance_to_town + is_urban + usage_capacity + water_source_clean + water_point_population + local_population_1km, data = Osun_wp_sp, bw = bw.fixed, family = "binomial", kernel = "gaussian", adaptive = FALSE, longlat = FALSE)
+```
+
+Now we view the results of the Geographically Weighted Logistic Regression.
+
+```{r}
+gwlr.fixed
+```
+
+To assess the performance of the gwLR, firstly, we will convert the SDF object in as data frame by using the code chunk below
+
+```{r}
+gwr.fixed <- as.data.frame(gwlr.fixed$SDF)
+```
+
+Next, we will label yhat values greater or equal to 0.5 into 1 and else 0. The result of the logic comparison operation will be saved into a field called most.
+
+```{r}
+gwr.fixed <- gwr.fixed %>%
+  mutate(most = ifelse(gwr.fixed$yhat >= 0.5, T, F))
+```
+
+```{r}
+gwr.fixed$y <- as.factor(gwr.fixed$y)
+gwr.fixed$most <- as.factor(gwr.fixed$most)
+CM <- confusionMatrix(data = gwr.fixed$most, reference = gwr.fixed$y)
+CM
+```
+
+The code chunk below filters out the following columns from our sf data frame for binding with gwr.fixed.
+
+```{r}
+Osun_wp_sf_selected <- Osun_wp_sf_clean %>%
+  select(c(ADM2_EN, ADM2_PCODE, ADM1_EN, ADM1_PCODE, status))
+```
+
+```{r}
+gwr_sf.fixed <- cbind(Osun_wp_sf_selected, gwr.fixed)
+```
+
+### Visualing coefficient estimates
+
+The code chunk below is used to create an interactive point symbol map
+
+```{r}
+tmap_mode("view")
+prob_T <- tm_shape(Osun) +
+  tm_polygons(alpha = 0.1) +
+  tm_shape(gwr_sf.fixed) +
+  tm_dots(col = "yhat", border.col = "gray60", border.lwd = 1) + tm_view(set.zoom.limits = c(8,14))
+prob_T
+```
+
+Now we plot the tiertiary_TV and prob_T side by side.
+
+```{r}
+tertiary_TV <- tm_shape(Osun) + tm_polygons(alpha = 0.1) + tm_shape(gwr_sf.fixed) + tm_dots(col = "distance_to_tertiary_road_TV", border.col = "gray60", border.lwd = 1) + tm_view(set.zoom.limits = c(8,14))
+
+tmap_arrange(tertiary_TV, prob_T)
+```
